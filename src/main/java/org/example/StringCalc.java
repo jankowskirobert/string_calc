@@ -3,14 +3,14 @@ package org.example;
 import java.util.stream.Stream;
 
 public class StringCalc {
-    //Create a simple String calculator with a method int Add(string numbers)
 
     public static int add(String numbers) {
         if(hasBlankArgs(numbers)) {
             return 0;
         }
-        String[] values = numbers.split(",");
+        String[] values = numbers.split("\\r?\\n|\\r|,");
         return Stream.of(values)
+                .map(String::trim)
                 .map(Integer::parseInt)
                 .reduce(Integer::sum)
                 .orElseThrow(()-> new NumberFormatException("Could not sum provided arguments"));

@@ -63,4 +63,18 @@ class StringCalcTest {
         String toBeSummed = "2,&$,-4";
         assertThrows(NumberFormatException.class, () -> StringCalc.add(toBeSummed));
     }
+
+    @Test
+    public void shouldSumFewNumbersDelimitedByCommaAndNewLine() {
+        String toBeSummed = "3\n2,-4";
+        int result = StringCalc.add(toBeSummed);
+        assertEquals(1, result);
+    }
+
+    @Test
+    public void shouldSumFewNumbersDelimitedByNewLine() {
+        String toBeSummed = "3\n2\n-4";
+        int result = StringCalc.add(toBeSummed);
+        assertEquals(1, result);
+    }
 }
