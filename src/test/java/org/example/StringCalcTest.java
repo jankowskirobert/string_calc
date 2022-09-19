@@ -51,5 +51,16 @@ class StringCalcTest {
         assertThrows(NumberFormatException.class, () -> StringCalc.add(toBeSummed));
     }
 
+    @Test
+    public void shouldSumFewNumbersDelimitedByComma() {
+        String toBeSummed = "2,3,-4";
+        int result = StringCalc.add(toBeSummed);
+        assertEquals(1, result);
+    }
 
+    @Test
+    public void shouldThrowExceptionIfOneArgumentIsNotNumber() {
+        String toBeSummed = "2,&$,-4";
+        assertThrows(NumberFormatException.class, () -> StringCalc.add(toBeSummed));
+    }
 }

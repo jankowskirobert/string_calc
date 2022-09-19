@@ -5,17 +5,15 @@ import java.util.stream.Stream;
 public class StringCalc {
     //Create a simple String calculator with a method int Add(string numbers)
 
-    /**
-     *
-     * @param args
-     * @return
-     */
     public static int add(String numbers) {
         if(hasBlankArgs(numbers)) {
             return 0;
         }
-
-        return Integer.parseInt(numbers);
+        String[] values = numbers.split(",");
+        return Stream.of(values)
+                .map(Integer::parseInt)
+                .reduce(Integer::sum)
+                .orElseThrow(()-> new NumberFormatException("Could not sum provided arguments"));
     }
 
 
