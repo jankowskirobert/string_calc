@@ -77,4 +77,17 @@ class StringCalcTest {
         int result = StringCalc.add(toBeSummed);
         assertEquals(1, result);
     }
+
+    @Test
+    public void shouldThrowExceptionIfContainsEmptyLeadingDelimiter() {
+        String toBeSummed = "\n2\n-4";
+        assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
+
+    }
+
+    @Test
+    public void shouldThrowExceptionIfContainsEmptyValue() {
+        String toBeSummed = "1,\n-4";
+        assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
+    }
 }
