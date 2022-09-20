@@ -21,8 +21,7 @@ public class StringCalc {
         if (isBlank(numbers)) {
             return 0;
         }
-        Matcher matcher = optionalDelimitersPattern.matcher(numbers);
-        String[] values = getSplitValues(numbers, matcher);
+        String[] values = getSplitValues(numbers);
         if (containsBlankValues(values)) {
             throw new IllegalArgumentException("Delimiters without leading values are not allowed");
         }
@@ -33,26 +32,40 @@ public class StringCalc {
                 .orElseThrow(() -> new NumberFormatException("Could not sum provided arguments"));
     }
 
-    private static String[] getSplitValues(String numbers, Matcher matcher) {
-        String toCalculate = numbers;
-        String delimiter = DEFAULT_DELIMITER;
+    private static String[] getSplitValues(String numbers) {
         if (numbers.startsWith(DELIMITER_PREFIX)) {
-            if (matcher.find()) {
-                delimiter = matcher.group(1);
-                Matcher multipleCharsMatcher = multipleCharsPattern.matcher(delimiter);
-                Set<String> delimiters = new HashSet<>();
-                while (multipleCharsMatcher.find()) {
-                    delimiters.add(multipleCharsMatcher.group(1));
-                }
-                if (!delimiters.isEmpty()) {
-                    delimiter = combineDelimiters(delimiters);
-                }
-                toCalculate = matcher.group(2);
-            } else {
-                throw new IllegalArgumentException("Wrong format of delimiter missing new line symbol");
-            }
+            return getValuesUsingOptionalDelimiter(numbers);
         }
-        return toCalculate.split(delimiter);
+        return numbers.split(DEFAULT_DELIMITER);
+    }
+
+    private static String[] getValuesUsingOptionalDelimiter(String numbers) {
+        Matcher matcher = optionalDelimitersPattern.matcher(numbers);
+        if (matcher.find()) {
+            // Group 1 is a delimiters definitions, singular or multiple
+            String optionalDelimiter = matcher.group(1);
+            optionalDelimiter = extractMultipleDelimiters(optionalDelimiter);
+            // Group 2 points to the new lined part after optional delimiter definition
+            String toCalculate = matcher.group(2);
+            return toCalculate.split(optionalDelimiter);
+        } else {
+            throw new IllegalArgumentException("Wrong format of delimiter missing new line symbol");
+        }
+
+    }
+
+    private static String extractMultipleDelimiters(String optionalDelimiter) {
+        Matcher multipleDelimiterDefinitionsMatcher = multipleCharsPattern.matcher(optionalDelimiter);
+        Set<String> delimiters = new HashSet<>();
+        while (multipleDelimiterDefinitionsMatcher.find()) {
+            // Group 1 points to single delimiter definition when there is more than one definition
+            // [AAA][BBB][CCC] -> AAA
+            delimiters.add(multipleDelimiterDefinitionsMatcher.group(1));
+        }
+        if (!delimiters.isEmpty()) {
+            optionalDelimiter = combineDelimiters(delimiters);
+        }
+        return optionalDelimiter;
     }
 
     private static String combineDelimiters(Set<String> delimiters) {
