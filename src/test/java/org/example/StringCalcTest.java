@@ -118,4 +118,11 @@ class StringCalcTest {
         IllegalArgumentException cannotParse = assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
         assertEquals("Negatives not allowed [-1, -2, -4]", cannotParse.getMessage());
     }
+
+    @Test
+    public void shouldIgnoreNumbersBiggerThan1000() {
+        String toBeSummed = "2,1002,1";
+        int result = StringCalc.add(toBeSummed);
+        assertEquals(3, result);
+    }
 }

@@ -12,6 +12,7 @@ public class StringCalc {
     private static final String DELIMITER_PREFIX = "//";
     private static final String DELIMITER_SUFFIX = "\n";
     private static final Pattern pattern = Pattern.compile(optionalDelimiterPattern(), Pattern.CASE_INSENSITIVE);
+    private static int IGNORE_TRESHOLD = 1000;
 
     public static int add(String numbers) {
         if (isBlank(numbers)) {
@@ -33,18 +34,20 @@ public class StringCalc {
         if (containsBlankValues(values)) {
             throw new IllegalArgumentException("Delimiters without leading values are not allowed");
         }
-        List<Integer> parsedValues = getParsedValues(values);
-        containsNegativeValues(parsedValues);
-        return parsedValues.stream()
+        List<Integer> preparedValues = prepareValuesToCalculation(values);
+        containsNegativeValues(preparedValues);
+        return preparedValues.stream()
                 .reduce(Integer::sum)
                 .orElseThrow(() -> new NumberFormatException("Could not sum provided arguments"));
     }
 
-    private static List<Integer> getParsedValues(String[] values) {
+    private static List<Integer> prepareValuesToCalculation(String[] values) {
         return Stream.of(values)
                 .map(String::trim)
                 .filter(StringCalc::nonEmpty)
-                .map(Integer::parseInt).collect(Collectors.toList());
+                .map(Integer::parseInt)
+                .filter(i -> i <= IGNORE_TRESHOLD)
+                .collect(Collectors.toList());
     }
 
     private static void containsNegativeValues(List<Integer> numbers) {
