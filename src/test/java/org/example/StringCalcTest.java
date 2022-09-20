@@ -53,49 +53,49 @@ class StringCalcTest {
 
     @Test
     public void shouldSumFewNumbersDelimitedByComma() {
-        String toBeSummed = "2,3,-4";
+        String toBeSummed = "2,3,4";
         int result = StringCalc.add(toBeSummed);
-        assertEquals(1, result);
+        assertEquals(9, result);
     }
 
     @Test
     public void shouldThrowExceptionIfOneArgumentIsNotNumber() {
-        String toBeSummed = "2,&$,-4";
+        String toBeSummed = "2,&$,4";
         assertThrows(NumberFormatException.class, () -> StringCalc.add(toBeSummed));
     }
 
     @Test
     public void shouldSumFewNumbersDelimitedByCommaAndNewLine() {
-        String toBeSummed = "3\n2,-4";
+        String toBeSummed = "3\n2,4";
         int result = StringCalc.add(toBeSummed);
-        assertEquals(1, result);
+        assertEquals(9, result);
     }
 
     @Test
     public void shouldSumFewNumbersDelimitedByNewLine() {
-        String toBeSummed = "3\n2\n-4";
+        String toBeSummed = "3\n2\n4";
         int result = StringCalc.add(toBeSummed);
-        assertEquals(1, result);
+        assertEquals(9, result);
     }
 
     @Test
     public void shouldThrowExceptionIfContainsEmptyLeadingDelimiter() {
-        String toBeSummed = "\n2\n-4";
+        String toBeSummed = "\n2\n4";
         assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
 
     }
 
     @Test
     public void shouldThrowExceptionIfContainsEmptyValue() {
-        String toBeSummed = "1,\n-4";
+        String toBeSummed = "1,\n4";
         assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
     }
 
     @Test
     public void shouldHandleSingleOptionalDelimiter() {
-        String toBeSummed = "//#@@\n1#@@4#@@-4";
+        String toBeSummed = "//#@@\n1#@@4#@@4";
         int result = StringCalc.add(toBeSummed);
-        assertEquals(1, result);
+        assertEquals(9, result);
     }
 
     @Test
@@ -103,5 +103,19 @@ class StringCalcTest {
         String toBeSummed = "//#@@1#@@4#@@-4";
         IllegalArgumentException cannotParse = assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
         assertEquals("Wrong format of delimiter missing new line symbol", cannotParse.getMessage());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfSingleValueIsNegative() {
+        String toBeSummed = "4,-4";
+        IllegalArgumentException cannotParse = assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
+        assertEquals("Negatives not allowed [-4]", cannotParse.getMessage());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfMultipleValuesAreNegative() {
+        String toBeSummed = "-1,-2,4,-4";
+        IllegalArgumentException cannotParse = assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
+        assertEquals("Negatives not allowed [-1, -2, -4]", cannotParse.getMessage());
     }
 }

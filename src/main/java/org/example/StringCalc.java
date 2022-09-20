@@ -1,7 +1,9 @@
 package org.example;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StringCalc {
@@ -31,12 +33,25 @@ public class StringCalc {
         if (containsBlankValues(values)) {
             throw new IllegalArgumentException("Delimiters without leading values are not allowed");
         }
+        List<Integer> parsedValues = getParsedValues(values);
+        containsNegativeValues(parsedValues);
+        return parsedValues.stream()
+                .reduce(Integer::sum)
+                .orElseThrow(() -> new NumberFormatException("Could not sum provided arguments"));
+    }
+
+    private static List<Integer> getParsedValues(String[] values) {
         return Stream.of(values)
                 .map(String::trim)
                 .filter(StringCalc::nonEmpty)
-                .map(Integer::parseInt)
-                .reduce(Integer::sum)
-                .orElseThrow(() -> new NumberFormatException("Could not sum provided arguments"));
+                .map(Integer::parseInt).collect(Collectors.toList());
+    }
+
+    private static void containsNegativeValues(List<Integer> numbers) {
+        List<Integer> negativeValues = numbers.stream().filter(i -> i < 0).collect(Collectors.toList());
+        if(!negativeValues.isEmpty()) {
+            throw new IllegalArgumentException(String.format("Negatives not allowed %s", negativeValues));
+        }
     }
 
     private static String removeOptionalDelimiter(String numbers, String toCalculate, String group) {
