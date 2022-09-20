@@ -90,4 +90,18 @@ class StringCalcTest {
         String toBeSummed = "1,\n-4";
         assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
     }
+
+    @Test
+    public void shouldHandleSingleOptionalDelimiter() {
+        String toBeSummed = "//#@@\n1#@@4#@@-4";
+        int result = StringCalc.add(toBeSummed);
+        assertEquals(1, result);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfOptionalDelimiterHasWrongFormat() {
+        String toBeSummed = "//#@@1#@@4#@@-4";
+        IllegalArgumentException cannotParse = assertThrows(IllegalArgumentException.class, () -> StringCalc.add(toBeSummed));
+        assertEquals("Wrong format of delimiter missing new line symbol", cannotParse.getMessage());
+    }
 }
