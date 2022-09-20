@@ -10,27 +10,19 @@ public class StringCalc {
 
     private static final String DEFAULT_DELIMITER = "\\r?\\n|\\r|,";
     private static final String DELIMITER_PREFIX = "//";
+    private static final String OPEN_PAR = "\\[";
+    private static final String CLOSE_PAR = "\\]";
     private static final String DELIMITER_SUFFIX = "\n";
-    private static final Pattern pattern = Pattern.compile(optionalDelimiterPattern(), Pattern.CASE_INSENSITIVE);
-    private static int IGNORE_TRESHOLD = 1000;
+    private static final Pattern multipleCharsPattern = Pattern.compile(multipleCharDelimiterPattern(), Pattern.CASE_INSENSITIVE);
+    private static final Pattern optionalDelimiterPattern = Pattern.compile(optionalDelimiterPattern(), Pattern.CASE_INSENSITIVE);
+    private static final int IGNORE_THRESHOLD = 1000;
 
     public static int add(String numbers) {
         if (isBlank(numbers)) {
             return 0;
         }
-        Matcher matcher = pattern.matcher(numbers);
-        String toCalculate = numbers;
-        String delimiter = DEFAULT_DELIMITER;
-        if (numbers.startsWith(DELIMITER_PREFIX)) {
-            if (matcher.find()) {
-                String group = matcher.group();
-                delimiter = group.substring(DELIMITER_PREFIX.length(), group.length() - DELIMITER_SUFFIX.length());
-                toCalculate = removeOptionalDelimiter(numbers, toCalculate, group);
-            } else {
-                throw new IllegalArgumentException("Wrong format of delimiter missing new line symbol");
-            }
-        }
-        String[] values = toCalculate.split(delimiter);
+        Matcher matcher = optionalDelimiterPattern.matcher(numbers);
+        String[] values = getSplitValues(numbers, matcher);
         if (containsBlankValues(values)) {
             throw new IllegalArgumentException("Delimiters without leading values are not allowed");
         }
@@ -41,12 +33,30 @@ public class StringCalc {
                 .orElseThrow(() -> new NumberFormatException("Could not sum provided arguments"));
     }
 
+    private static String[] getSplitValues(String numbers, Matcher matcher) {
+        String toCalculate = numbers;
+        String delimiter = DEFAULT_DELIMITER;
+        if (numbers.startsWith(DELIMITER_PREFIX)) {
+            if (matcher.find()) {
+                delimiter = matcher.group(1);
+                Matcher multipleCharsMatcher = multipleCharsPattern.matcher(delimiter);
+                if(multipleCharsMatcher.find()) {
+                    delimiter = multipleCharsMatcher.group(1);
+                }
+                toCalculate = matcher.group(2);
+            } else {
+                throw new IllegalArgumentException("Wrong format of delimiter missing new line symbol");
+            }
+        }
+        return toCalculate.split(delimiter);
+    }
+
     private static List<Integer> prepareValuesToCalculation(String[] values) {
         return Stream.of(values)
                 .map(String::trim)
                 .filter(StringCalc::nonEmpty)
                 .map(Integer::parseInt)
-                .filter(i -> i <= IGNORE_TRESHOLD)
+                .filter(i -> i <= IGNORE_THRESHOLD)
                 .collect(Collectors.toList());
     }
 
@@ -57,15 +67,12 @@ public class StringCalc {
         }
     }
 
-    private static String removeOptionalDelimiter(String numbers, String toCalculate, String group) {
-        if (numbers.startsWith(group)) {
-            toCalculate = numbers.substring(group.length());
-        }
-        return toCalculate;
+    private static String optionalDelimiterPattern() {
+        return "^" + DELIMITER_PREFIX  + "(.*)" + DELIMITER_SUFFIX + "(.*)";
     }
 
-    private static String optionalDelimiterPattern() {
-        return "^" + DELIMITER_PREFIX + ".*" + DELIMITER_SUFFIX;
+    private static String multipleCharDelimiterPattern() {
+        return "^" + OPEN_PAR + "(.*)" +CLOSE_PAR+"$" ;
     }
 
     private static boolean containsBlankValues(String[] values) {

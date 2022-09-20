@@ -93,7 +93,7 @@ class StringCalcTest {
 
     @Test
     public void shouldHandleSingleOptionalDelimiter() {
-        String toBeSummed = "//#@@\n1#@@4#@@4";
+        String toBeSummed = "//#\n1#4#4";
         int result = StringCalc.add(toBeSummed);
         assertEquals(9, result);
     }
@@ -124,5 +124,12 @@ class StringCalcTest {
         String toBeSummed = "2,1002,1";
         int result = StringCalc.add(toBeSummed);
         assertEquals(3, result);
+    }
+
+    @Test
+    public void should() {
+        String toBeSummed = "//[#@@]\n1#@@4#@@4";
+        int result = StringCalc.add(toBeSummed);
+        assertEquals(9, result);
     }
 }
