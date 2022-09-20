@@ -127,8 +127,15 @@ class StringCalcTest {
     }
 
     @Test
-    public void should() {
+    public void shouldHandleMultipleCharacterOptionalDelimiter() {
         String toBeSummed = "//[#@@]\n1#@@4#@@4";
+        int result = StringCalc.add(toBeSummed);
+        assertEquals(9, result);
+    }
+
+    @Test
+    public void shouldHandleMultipleCharacterOptionalDelimiters() {
+        String toBeSummed = "//[#@@][!]\n1#@@4!4";
         int result = StringCalc.add(toBeSummed);
         assertEquals(9, result);
     }
